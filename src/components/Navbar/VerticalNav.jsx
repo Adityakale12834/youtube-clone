@@ -1,0 +1,186 @@
+import { useState } from "react";
+import {
+  FaHome,
+  FaCompass,
+  FaYoutube,
+  FaHistory,
+  FaThumbsUp,
+  FaBars,
+} from "react-icons/fa";
+import { MdSubscriptions, MdVideoLibrary, MdWatchLater } from "react-icons/md";
+import { SiYoutubemusic, SiYoutubegaming } from "react-icons/si";
+import { IoMdSettings } from "react-icons/io";
+
+const YouTubeVerticalNav = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const toggleNavbar = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  return (
+    <>
+      <div
+        className={`h-screen bg-white fixed left-0 top-0 pt-13 overflow-y-scroll transition-all duration-300 ${
+          isCollapsed ? "w-20" : "w-64"
+        }`}
+      >
+        {/* Header with toggle button */}
+        {/* <div className="flex items-center p-4 sticky top-0 bg-white w-full">
+          <button
+            onClick={toggleNavbar}
+            className="p-2 rounded-full hover:bg-gray-200"
+          >
+            <FaBars className="text-xl" />
+          </button>
+          {!isCollapsed && (
+            <img
+              className="w-30 ml-6"
+              src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg"
+              alt="YouTube Logo"
+            />
+          )}
+        </div> */}
+        {/* Main Navigation */}
+        <div className="py-2">
+          <NavItem
+            icon={<FaHome className="text-xl" />}
+            text="Home"
+            active
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<FaCompass className="text-xl" />}
+            text="Explore"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<FaYoutube className="text-xl text-red-600" />}
+            text="Shorts"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<MdSubscriptions className="text-xl" />}
+            text="Subscriptions"
+            isCollapsed={isCollapsed}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-2"></div>
+
+        {/* You Section */}
+        <div className="py-2">
+          {!isCollapsed && (
+            <h3 className="px-6 py-1 text-sm font-medium text-gray-500">You</h3>
+          )}
+          <NavItem
+            icon={<MdVideoLibrary className="text-xl" />}
+            text="Library"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<FaHistory className="text-xl" />}
+            text="History"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<MdWatchLater className="text-xl" />}
+            text="Watch later"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<FaThumbsUp className="text-xl" />}
+            text="Liked videos"
+            isCollapsed={isCollapsed}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-2"></div>
+
+        {/* Subscriptions Section */}
+        <div className="py-2">
+          {!isCollapsed && (
+            <h3 className="px-6 py-1 text-sm font-medium text-gray-500">
+              Subscriptions
+            </h3>
+          )}
+          <NavItem
+            image="https://yt3.googleusercontent.com/ytc/APkrFKZWeMCsx4Q9e_Hm6nhOOUQ3fv96QGUXiMr1-pPP=s176-c-k-c0x00ffffff-no-rj"
+            text="Channel 1"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            image="https://yt3.googleusercontent.com/ytc/APkrFKaqca-x1tOP0B4nzWxNFQk6Z-8_9h0YGiVX1x2H=s176-c-k-c0x00ffffff-no-rj"
+            text="Channel 2"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            image="https://yt3.googleusercontent.com/ytc/APkrFKbY9Zk8D1W_7w8r7DyiZJ1FL3i7ZJw8Y9n5n5jK=s176-c-k-c0x00ffffff-no-rj"
+            text="Channel 3"
+            isCollapsed={isCollapsed}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-2"></div>
+
+        {/* Explore Section */}
+        <div className="py-2">
+          {!isCollapsed && (
+            <h3 className="px-6 py-1 text-sm font-medium text-gray-500">
+              Explore
+            </h3>
+          )}
+          <NavItem
+            icon={<SiYoutubemusic className="text-xl" />}
+            text="Music"
+            isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<SiYoutubegaming className="text-xl" />}
+            text="Gaming"
+            isCollapsed={isCollapsed}
+          />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-2"></div>
+
+        {/* Settings */}
+        <div className="py-2">
+          <NavItem
+            icon={<IoMdSettings className="text-xl" />}
+            text="Settings"
+            isCollapsed={isCollapsed}
+          />
+        </div>
+      </div>
+    </>
+  );
+};
+
+const NavItem = ({ icon, text, active = false, image, isCollapsed }) => {
+  return (
+    <div
+      className={`flex items-center px-6 py-3 cursor-pointer hover:bg-gray-100 ${
+        active ? "bg-gray-100 font-medium" : ""
+      } ${isCollapsed ? "justify-center" : ""}`}
+      title={isCollapsed ? text : ""} // Show tooltip when collapsed
+    >
+      {image ? (
+        <img
+          src={image}
+          alt={text}
+          className={`rounded-full ${isCollapsed ? "w-6 h-6" : "w-6 h-6 mr-6"}`}
+        />
+      ) : (
+        <span className={isCollapsed ? "" : "mr-6"}>{icon}</span>
+      )}
+      {!isCollapsed && <span>{text}</span>}
+    </div>
+  );
+};
+
+export default YouTubeVerticalNav;
