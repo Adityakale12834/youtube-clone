@@ -10,9 +10,12 @@ import {
 import { MdSubscriptions, MdVideoLibrary, MdWatchLater } from "react-icons/md";
 import { SiYoutubemusic, SiYoutubegaming } from "react-icons/si";
 import { IoMdSettings } from "react-icons/io";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const YouTubeVerticalNav = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const subscriber = useSelector((state) => state.subscriber);
 
   const toggleNavbar = () => {
     setIsCollapsed(!isCollapsed);
@@ -48,11 +51,13 @@ const YouTubeVerticalNav = () => {
             text="Home"
             active
             isCollapsed={isCollapsed}
+            route="/"
           />
           <NavItem
             icon={<FaCompass className="text-xl" />}
             text="Explore"
             isCollapsed={isCollapsed}
+            route="/explore"
           />
           <NavItem
             icon={<FaYoutube className="text-xl text-red-600" />}
@@ -63,6 +68,12 @@ const YouTubeVerticalNav = () => {
             icon={<MdSubscriptions className="text-xl" />}
             text="Subscriptions"
             isCollapsed={isCollapsed}
+          />
+          <NavItem
+            icon={<SiYoutubegaming className="text-xl" />}
+            text="Gaming"
+            isCollapsed={isCollapsed}
+            route="/gaming"
           />
         </div>
 
@@ -83,11 +94,13 @@ const YouTubeVerticalNav = () => {
             icon={<FaHistory className="text-xl" />}
             text="History"
             isCollapsed={isCollapsed}
+            route="/history"
           />
           <NavItem
             icon={<MdWatchLater className="text-xl" />}
             text="Watch later"
             isCollapsed={isCollapsed}
+            route="/saved"
           />
           <NavItem
             icon={<FaThumbsUp className="text-xl" />}
@@ -106,21 +119,16 @@ const YouTubeVerticalNav = () => {
               Subscriptions
             </h3>
           )}
-          <NavItem
-            image="https://yt3.googleusercontent.com/ytc/APkrFKZWeMCsx4Q9e_Hm6nhOOUQ3fv96QGUXiMr1-pPP=s176-c-k-c0x00ffffff-no-rj"
-            text="Channel 1"
-            isCollapsed={isCollapsed}
-          />
-          <NavItem
-            image="https://yt3.googleusercontent.com/ytc/APkrFKaqca-x1tOP0B4nzWxNFQk6Z-8_9h0YGiVX1x2H=s176-c-k-c0x00ffffff-no-rj"
-            text="Channel 2"
-            isCollapsed={isCollapsed}
-          />
-          <NavItem
-            image="https://yt3.googleusercontent.com/ytc/APkrFKbY9Zk8D1W_7w8r7DyiZJ1FL3i7ZJw8Y9n5n5jK=s176-c-k-c0x00ffffff-no-rj"
-            text="Channel 3"
-            isCollapsed={isCollapsed}
-          />
+          {subscriber.map((channel) => {
+            return (
+              <NavItem
+                key={channel.id}
+                image={channel.image}
+                text={channel.name}
+                isCollapsed={isCollapsed}
+              />
+            );
+          })}
         </div>
 
         {/* Divider */}
@@ -136,11 +144,6 @@ const YouTubeVerticalNav = () => {
           <NavItem
             icon={<SiYoutubemusic className="text-xl" />}
             text="Music"
-            isCollapsed={isCollapsed}
-          />
-          <NavItem
-            icon={<SiYoutubegaming className="text-xl" />}
-            text="Gaming"
             isCollapsed={isCollapsed}
           />
         </div>
@@ -161,25 +164,29 @@ const YouTubeVerticalNav = () => {
   );
 };
 
-const NavItem = ({ icon, text, active = false, image, isCollapsed }) => {
+const NavItem = ({ icon, text, active = false, image, isCollapsed, route }) => {
   return (
-    <div
-      className={`flex items-center px-6 py-3 cursor-pointer hover:bg-gray-100 ${
-        active ? "bg-gray-100 font-medium" : ""
-      } ${isCollapsed ? "justify-center" : ""}`}
-      title={isCollapsed ? text : ""} // Show tooltip when collapsed
-    >
-      {image ? (
-        <img
-          src={image}
-          alt={text}
-          className={`rounded-full ${isCollapsed ? "w-6 h-6" : "w-6 h-6 mr-6"}`}
-        />
-      ) : (
-        <span className={isCollapsed ? "" : "mr-6"}>{icon}</span>
-      )}
-      {!isCollapsed && <span>{text}</span>}
-    </div>
+    <Link to={route}>
+      <div
+        className={`flex items-center px-6 py-3 cursor-pointer hover:bg-gray-100 ${
+          active ? "bg-gray-100 font-medium" : ""
+        } ${isCollapsed ? "justify-center" : ""}`}
+        title={isCollapsed ? text : ""} // Show tooltip when collapsed
+      >
+        {image ? (
+          <img
+            src={image}
+            alt={text}
+            className={`rounded-full ${
+              isCollapsed ? "w-6 h-6" : "w-6 h-6 mr-6"
+            }`}
+          />
+        ) : (
+          <span className={isCollapsed ? "" : "mr-6"}>{icon}</span>
+        )}
+        {!isCollapsed && <span>{text}</span>}
+      </div>
+    </Link>
   );
 };
 

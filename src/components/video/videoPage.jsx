@@ -7,8 +7,15 @@ import {
   FaShare,
   FaEllipsisH,
   FaReply,
+  FaEdit,
+  FaTrash,
 } from "react-icons/fa";
 import { MdPlaylistAdd, MdDownload } from "react-icons/md";
+import SaveButton from "./saveButton";
+import { useSelector, useDispatch } from "react-redux";
+import { subscribe, unsubscribe } from "../store/slices/subscriberSlice";
+import { addToLibrary } from "../store/slices/librarySlice";
+// import { FaEdit, FaTrash } from "react-icons/fa";
 
 function VideoPage() {
   const { videoId } = useParams();
@@ -22,12 +29,22 @@ function VideoPage() {
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [editingReplyId, setEditingReplyId] = useState(null);
+  const [editReplyText, setEditReplyText] = useState("");
+  const dispatch = useDispatch();
+
+  const subscriber = useSelector((state) => state.subscriber);
+  const library = useSelector((state) => state.library);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const data = await fetchVideoDetails(videoId);
         setVideoData(data.video_details);
+        console.log(data.video_details);
+        dispatch(addToLibrary(data.video_details));
         // Mock comments data - in a real app, you'd fetch these from an API
         setComments([
           {
@@ -281,6 +298,87 @@ function VideoPage() {
       );
     }
   };
+  // Handler functions to add
+  const handleEditComment = (commentId) => {
+    const comment = comments.find((c) => c.id === commentId);
+    setEditCommentText(comment.text);
+    setEditingCommentId(commentId);
+  };
+
+  const handleSaveEdit = (commentId) => {
+    // Update the comment in your state or make API call
+    const updatedComments = comments.map((comment) =>
+      comment.id === commentId ? { ...comment, text: editCommentText } : comment
+    );
+    setComments(updatedComments);
+    setEditingCommentId(null);
+  };
+
+  const handleDeleteComment = (commentId) => {
+    // Confirm deletion
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      // Remove the comment from your state or make API call
+      const updatedComments = comments.filter(
+        (comment) => comment.id !== commentId
+      );
+      setComments(updatedComments);
+    }
+  };
+
+  const handleEditReply = (commentId, replyId) => {
+    const comment = comments.find((c) => c.id === commentId);
+    const reply = comment.replies.find((r) => r.id === replyId);
+    setEditReplyText(reply.text);
+    setEditingReplyId(replyId);
+  };
+
+  const handleSaveReplyEdit = (commentId, replyId) => {
+    // Update the reply in your state or make API call
+    const updatedComments = comments.map((comment) => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          replies: comment.replies.map((reply) =>
+            reply.id === replyId ? { ...reply, text: editReplyText } : reply
+          ),
+        };
+      }
+      return comment;
+    });
+    setComments(updatedComments);
+    setEditingReplyId(null);
+  };
+
+  const handleDeleteReply = (commentId, replyId) => {
+    if (window.confirm("Are you sure you want to delete this reply?")) {
+      // Remove the reply from your state or make API call
+      const updatedComments = comments.map((comment) => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            replies: comment.replies.filter((reply) => reply.id !== replyId),
+          };
+        }
+        return comment;
+      });
+      setComments(updatedComments);
+    }
+  };
+
+  const handleChangeSub = (videoInfo) => {
+    if (isSubscribed) {
+      dispatch(unsubscribe(videoInfo.id));
+    } else {
+      dispatch(
+        subscribe({
+          name: videoInfo.channel.name,
+          id: videoInfo.id,
+          image: videoInfo.channel.profile_image_url,
+        })
+      );
+    }
+    setIsSubscribed(!isSubscribed);
+  };
 
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
@@ -355,9 +453,8 @@ function VideoPage() {
                 <MdDownload className="mr-2" />
                 <span>Download</span>
               </button>
-              <button className="flex items-center px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                <MdPlaylistAdd className="mr-2" />
-                <span>Save</span>
+              <button className="">
+                <SaveButton video={videoData} />
               </button>
               <button className="flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200">
                 <FaEllipsisH />
@@ -387,7 +484,10 @@ function VideoPage() {
                 ? "bg-gray-200 text-black"
                 : "bg-red-600 text-white hover:bg-red-700"
             }`}
-            onClick={() => setIsSubscribed(!isSubscribed)}
+            onClick={() => {
+              setIsSubscribed(!isSubscribed);
+              handleChangeSub(videoData);
+            }}
           >
             {isSubscribed ? "Subscribed" : "Subscribe"}
           </button>
@@ -431,7 +531,7 @@ function VideoPage() {
             {comments.length} Comments
           </h3>
 
-          {/* Add Comment */}
+          {/* Add Comment (unchanged) */}
           <div className="flex mb-6">
             <img
               src="https://randomuser.me/api/portraits/men/5.jpg"
@@ -487,8 +587,56 @@ function VideoPage() {
                     <span className="text-sm text-gray-500">
                       {formatTimeAgo(comment.timestamp)}
                     </span>
+                    {/* Edit/Delete buttons (only show for current user's comments) */}
+                    {comment.isCurrentUser && (
+                      <div className="ml-auto flex">
+                        <button
+                          className="text-gray-500 hover:text-gray-700 mr-2"
+                          onClick={() => handleEditComment(comment.id)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="text-gray-500 hover:text-red-500"
+                          onClick={() => handleDeleteComment(comment.id)}
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-gray-800 mb-2">{comment.text}</p>
+
+                  {/* Comment text or edit input */}
+                  {editingCommentId === comment.id ? (
+                    <div className="mb-2">
+                      <input
+                        type="text"
+                        className="w-full border-b border-gray-300 pb-2 focus:outline-none focus:border-blue-500"
+                        value={editCommentText}
+                        onChange={(e) => setEditCommentText(e.target.value)}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && handleSaveEdit(comment.id)
+                        }
+                      />
+                      <div className="flex justify-end mt-2">
+                        <button
+                          className="px-4 py-1 bg-gray-200 rounded-full mr-2 hover:bg-gray-300"
+                          onClick={() => setEditingCommentId(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="px-4 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+                          onClick={() => handleSaveEdit(comment.id)}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-800 mb-2">{comment.text}</p>
+                  )}
+
                   <div className="flex items-center text-sm text-gray-500">
                     <button
                       className={`flex items-center mr-3 ${
@@ -521,7 +669,7 @@ function VideoPage() {
                     </button>
                   </div>
 
-                  {/* Reply Input */}
+                  {/* Reply Input (unchanged) */}
                   {replyingTo === comment.id && (
                     <div className="flex mt-4">
                       <img
@@ -565,7 +713,7 @@ function VideoPage() {
                 </div>
               </div>
 
-              {/* Replies */}
+              {/* Replies (with edit/delete functionality) */}
               {comment.replies.length > 0 && (
                 <div className="ml-12 mt-4 pl-4 border-l-2 border-gray-200">
                   {comment.replies.map((reply) => (
@@ -584,10 +732,67 @@ function VideoPage() {
                             <span className="text-xs text-gray-500">
                               {formatTimeAgo(reply.timestamp)}
                             </span>
+                            {/* Edit/Delete buttons for replies */}
+                            {reply.isCurrentUser && (
+                              <div className="ml-auto flex">
+                                <button
+                                  className="text-gray-500 hover:text-gray-700 mr-2 text-xs"
+                                  onClick={() =>
+                                    handleEditReply(comment.id, reply.id)
+                                  }
+                                >
+                                  <FaEdit size={12} />
+                                </button>
+                                <button
+                                  className="text-gray-500 hover:text-red-500 text-xs"
+                                  onClick={() =>
+                                    handleDeleteReply(comment.id, reply.id)
+                                  }
+                                >
+                                  <FaTrash size={12} />
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-gray-800 mb-2 text-sm">
-                            {reply.text}
-                          </p>
+
+                          {/* Reply text or edit input */}
+                          {editingReplyId === reply.id ? (
+                            <div className="mb-2">
+                              <input
+                                type="text"
+                                className="w-full border-b border-gray-300 pb-2 focus:outline-none focus:border-blue-500 text-sm"
+                                value={editReplyText}
+                                onChange={(e) =>
+                                  setEditReplyText(e.target.value)
+                                }
+                                onKeyPress={(e) =>
+                                  e.key === "Enter" &&
+                                  handleSaveReplyEdit(comment.id, reply.id)
+                                }
+                              />
+                              <div className="flex justify-end mt-2">
+                                <button
+                                  className="px-3 py-1 bg-gray-200 rounded-full mr-2 hover:bg-gray-300 text-xs"
+                                  onClick={() => setEditingReplyId(null)}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  className="px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs"
+                                  onClick={() =>
+                                    handleSaveReplyEdit(comment.id, reply.id)
+                                  }
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-gray-800 mb-2 text-sm">
+                              {reply.text}
+                            </p>
+                          )}
+
                           <div className="flex items-center text-xs text-gray-500">
                             <button
                               className={`flex items-center mr-3 ${
@@ -623,13 +828,13 @@ function VideoPage() {
         </div>
 
         {/* Shrwag Section */}
-        <div className="bg-gray-100 p-6 rounded-lg mb-8">
+        {/* <div className="bg-gray-100 p-6 rounded-lg mb-8">
           <h2 className="text-xl font-bold mb-2">SHRWAG</h2>
           <p className="text-lg">
             Shares His Experience with <br />
             <strong className="text-xl">iB CRICKET</strong>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

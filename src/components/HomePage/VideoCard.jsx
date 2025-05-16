@@ -1,5 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+// import { useDispatch } from "react-redux";
+// import { addVideo } from "../store/slices/savedVideosSlice";
 
 const VideoCard = ({ video }) => {
   const navigate = useNavigate();
@@ -34,7 +36,6 @@ const VideoCard = ({ video }) => {
           alt={video.title}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Duration badge would go here if available */}
       </div>
 
       {/* Video info */}
@@ -48,7 +49,6 @@ const VideoCard = ({ video }) => {
           />
         </div>
 
-        {/* Video details */}
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
             {video.title}
