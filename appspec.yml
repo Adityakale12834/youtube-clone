@@ -1,0 +1,29 @@
+version: 0.0
+os: linux
+files:
+  - source: /build
+    destination: /var/www/react-app
+
+hooks:
+  BeforeInstall:
+    - location: scripts/clean_old_build.sh
+      timeout: 300
+      runas: ubuntu
+
+  AfterInstall:
+    - location: scripts/install_dependencies.sh
+      timeout: 300
+      runas: ubuntu
+    - location: scripts/copy_build.sh
+      timeout: 300
+      runas: ubuntu
+
+  ApplicationStart:
+    - location: scripts/start_server.sh
+      timeout: 300
+      runas: ubuntu
+
+  ValidateService:
+    - location: scripts/validate.sh
+      timeout: 300
+      runas: ubuntu
