@@ -15,15 +15,27 @@ import SaveButton from "./saveButton";
 import { useSelector, useDispatch } from "react-redux";
 import { subscribe, unsubscribe } from "../store/slices/subscriberSlice";
 import { addToLibrary } from "../store/slices/librarySlice";
-// import { FaEdit, FaTrash } from "react-icons/fa";
+import {
+  likeVideo,
+  unlikeVideo,
+  toggleLikeVideo,
+} from "../store/slices/likedSlice";
 
 function VideoPage() {
   const { videoId } = useParams();
+  const dispatch = useDispatch();
+  const likedVideos = useSelector((state) => state.liked);
+  const subscriber = useSelector((state) => state.subscriber);
+  const library = useSelector((state) => state.library);
+  console.log(likedVideos);
+  console.log(videoId);
   const [videoData, setVideoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [likeStatus, setLikeStatus] = useState(null);
+  const [likeStatus, setLikeStatus] = useState(
+    likedVideos.some((v) => v.id !== videoId)
+  );
   const [showMoreDescription, setShowMoreDescription] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState([]);
@@ -33,17 +45,12 @@ function VideoPage() {
   const [editCommentText, setEditCommentText] = useState("");
   const [editingReplyId, setEditingReplyId] = useState(null);
   const [editReplyText, setEditReplyText] = useState("");
-  const dispatch = useDispatch();
-
-  const subscriber = useSelector((state) => state.subscriber);
-  const library = useSelector((state) => state.library);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const data = await fetchVideoDetails(videoId);
         setVideoData(data.video_details);
-        console.log(data.video_details);
         dispatch(addToLibrary(data.video_details));
         // Mock comments data - in a real app, you'd fetch these from an API
         setComments([
@@ -426,9 +433,10 @@ function VideoPage() {
                     ? "bg-blue-100 text-blue-600"
                     : "bg-gray-100 hover:bg-gray-200"
                 }`}
-                onClick={() =>
-                  setLikeStatus(likeStatus === "like" ? null : "like")
-                }
+                onClick={() => {
+                  setLikeStatus(likeStatus === "like" ? null : "like");
+                  dispatch(likeVideo(videoData));
+                }}
               >
                 <FaThumbsUp className="mr-2" />
                 <span>Like</span>
@@ -439,9 +447,10 @@ function VideoPage() {
                     ? "bg-blue-100 text-blue-600"
                     : "bg-gray-100 hover:bg-gray-200"
                 }`}
-                onClick={() =>
-                  setLikeStatus(likeStatus === "dislike" ? null : "dislike")
-                }
+                onClick={() => {
+                  setLikeStatus(likeStatus === "dislike" ? null : "dislike");
+                  dispatch(unlikeVideo(videoData));
+                }}
               >
                 <FaThumbsDown className="mr-2" />
               </button>

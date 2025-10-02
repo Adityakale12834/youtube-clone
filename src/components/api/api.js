@@ -24,6 +24,16 @@ export const fetchHomeVideos = async (searchQuery = "") => {
   }
 };
 
+export const searchVideos = async (searchQuery = "dhoni") => {
+  try {
+    const response = await api.get(`/videos/all?search=${searchQuery}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching home videos:", error);
+    throw error;
+  }
+};
+
 export const fetchTrendingVideos = async () => {
   try {
     const response = await api.get("/videos/trending");

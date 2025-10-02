@@ -10,15 +10,20 @@ import {
 import { MdSubscriptions, MdVideoLibrary, MdWatchLater } from "react-icons/md";
 import { SiYoutubemusic, SiYoutubegaming } from "react-icons/si";
 import { IoMdSettings } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const YouTubeVerticalNav = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const subscriber = useSelector((state) => state.subscriber);
+  const location = useLocation();
 
   const toggleNavbar = () => {
     setIsCollapsed(!isCollapsed);
+  };
+
+  const isActive = (route) => {
+    return location.pathname === route;
   };
 
   return (
@@ -28,50 +33,40 @@ const YouTubeVerticalNav = () => {
           isCollapsed ? "w-20" : "w-64"
         }`}
       >
-        {/* Header with toggle button */}
-        {/* <div className="flex items-center p-4 sticky top-0 bg-white w-full">
-          <button
-            onClick={toggleNavbar}
-            className="p-2 rounded-full hover:bg-gray-200"
-          >
-            <FaBars className="text-xl" />
-          </button>
-          {!isCollapsed && (
-            <img
-              className="w-30 ml-6"
-              src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg"
-              alt="YouTube Logo"
-            />
-          )}
-        </div> */}
         {/* Main Navigation */}
         <div className="py-2">
           <NavItem
             icon={<FaHome className="text-xl" />}
             text="Home"
-            active
+            active={isActive("/")}
             isCollapsed={isCollapsed}
             route="/"
           />
           <NavItem
             icon={<FaCompass className="text-xl" />}
             text="Explore"
+            active={isActive("/explore")}
             isCollapsed={isCollapsed}
             route="/explore"
           />
-          <NavItem
+          {/* <NavItem
             icon={<FaYoutube className="text-xl text-red-600" />}
             text="Shorts"
+            active={isActive("/shorts")}
             isCollapsed={isCollapsed}
+            route="/shorts"
           />
           <NavItem
             icon={<MdSubscriptions className="text-xl" />}
             text="Subscriptions"
+            active={isActive("/subscriptions")}
             isCollapsed={isCollapsed}
-          />
+            route="/subscriptions"
+          /> */}
           <NavItem
             icon={<SiYoutubegaming className="text-xl" />}
             text="Gaming"
+            active={isActive("/gaming")}
             isCollapsed={isCollapsed}
             route="/gaming"
           />
@@ -85,27 +80,33 @@ const YouTubeVerticalNav = () => {
           {!isCollapsed && (
             <h3 className="px-6 py-1 text-sm font-medium text-gray-500">You</h3>
           )}
-          <NavItem
+          {/* <NavItem
             icon={<MdVideoLibrary className="text-xl" />}
             text="Library"
+            active={isActive("/library")}
             isCollapsed={isCollapsed}
-          />
+            route="/library"
+          /> */}
           <NavItem
             icon={<FaHistory className="text-xl" />}
             text="History"
+            active={isActive("/history")}
             isCollapsed={isCollapsed}
             route="/history"
           />
           <NavItem
             icon={<MdWatchLater className="text-xl" />}
-            text="Watch later"
+            text="Saved Video"
+            active={isActive("/saved")}
             isCollapsed={isCollapsed}
             route="/saved"
           />
           <NavItem
             icon={<FaThumbsUp className="text-xl" />}
             text="Liked videos"
+            active={isActive("/liked-videos")}
             isCollapsed={isCollapsed}
+            route="/liked-videos"
           />
         </div>
 
@@ -125,7 +126,9 @@ const YouTubeVerticalNav = () => {
                 key={channel.id}
                 image={channel.image}
                 text={channel.name}
+                active={isActive(`/channel/${channel.id}`)}
                 isCollapsed={isCollapsed}
+                route={`/channel/${channel.id}`}
               />
             );
           })}
@@ -144,7 +147,9 @@ const YouTubeVerticalNav = () => {
           <NavItem
             icon={<SiYoutubemusic className="text-xl" />}
             text="Music"
+            active={isActive("/music")}
             isCollapsed={isCollapsed}
+            route="/music"
           />
         </div>
 
@@ -156,7 +161,9 @@ const YouTubeVerticalNav = () => {
           <NavItem
             icon={<IoMdSettings className="text-xl" />}
             text="Settings"
+            active={isActive("/settings")}
             isCollapsed={isCollapsed}
+            route="/settings"
           />
         </div>
       </div>
@@ -171,7 +178,7 @@ const NavItem = ({ icon, text, active = false, image, isCollapsed, route }) => {
         className={`flex items-center px-6 py-3 cursor-pointer hover:bg-gray-100 ${
           active ? "bg-gray-100 font-medium" : ""
         } ${isCollapsed ? "justify-center" : ""}`}
-        title={isCollapsed ? text : ""} // Show tooltip when collapsed
+        title={isCollapsed ? text : ""}
       >
         {image ? (
           <img

@@ -8,6 +8,8 @@ import Explore from "./components/explore/Explore";
 import GamingPage from "./components/gaming/GamingPage";
 import SavedVideos from "./components/savedVideos/savePage";
 import LibraryPage from "./components/Library/LibraryPage";
+import SearchPage from "./components/search/SearchPage";
+import LikedVideos from "./components/LikedVideo/LikedVideos";
 // import ExplorePage from "./pages/ExplorePage";
 // import ShortsPage from "./pages/ShortsPage";
 // import SubscriptionsPage from "./pages/SubscriptionsPage";
@@ -33,6 +35,8 @@ function App() {
         <Route path="/gaming" element={<GamingPage />} />
         <Route path="/saved" element={<SavedVideos />} />
         <Route path="/history" element={<LibraryPage />} />
+        <Route path="/liked-videos" element={<LikedVideos />} />
+        <Route path="/search/:searchQuery" element={<SearchPage />} />
         {/* <Route path="/shorts" element={<ShortsPage />} />
         <Route path="/subscriptions" element={<SubscriptionsPage />} />
         <Route path="/history" element={<HistoryPage />} />

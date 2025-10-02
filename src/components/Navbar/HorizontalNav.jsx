@@ -1,17 +1,24 @@
 import { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   FaSearch,
   FaMicrophone,
   FaVideo,
   FaBell,
   FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import { MdApps } from "react-icons/md";
+import { searchVideos } from "../store/slices/videoSlice";
+import { Link, useNavigate } from "react-router-dom";
 
 const YouTubeNavbar = () => {
+  const dispatch = useDispatch();
+  const loading = useSelector((state) => state.videos);
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchRef = useRef(null);
+  const navigate = useNavigate();
 
   // Handle click outside search bar on mobile
   useEffect(() => {
@@ -31,6 +38,18 @@ const YouTubeNavbar = () => {
     };
   }, [showMobileSearch]);
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    dispatch(searchVideos(searchQuery));
+    navigate(`/search/${searchQuery}`);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm w-screen">
       <div className="flex items-center justify-between h-14 px-4 md:px-6">
@@ -39,17 +58,20 @@ const YouTubeNavbar = () => {
           <button className="p-2 rounded-full hover:bg-gray-200">
             <FaBars className="text-lg" />
           </button>
-          <div className="flex items-center">
-            <img
-              src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg"
-              alt="YouTube Logo"
-              className="h-6"
-            />
-          </div>
+          <Link to="/">
+            <div className="flex items-center">
+              <img
+                src="https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg"
+                alt="YouTube Logo"
+                className="h-6"
+              />
+            </div>
+          </Link>
         </div>
 
         {/* Center section - Search bar (desktop) */}
-        <div
+        <form
+          onSubmit={handleSearch}
           className={`hidden md:flex items-center justify-center flex-1 max-w-2xl mx-4`}
         >
           <div className="relative flex w-full">
@@ -60,14 +82,30 @@ const YouTubeNavbar = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:border-blue-500"
             />
-            <button className="px-5 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200">
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200 mr-4"
+              >
+                <FaTimes className="text-gray-500" />
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 disabled:opacity-50"
+            >
               <FaSearch className="text-gray-600" />
             </button>
           </div>
-          <button className="p-2 ml-2 rounded-full bg-gray-100 hover:bg-gray-200">
+          <button
+            type="button"
+            className="p-2 ml-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          >
             <FaMicrophone className="text-gray-600" />
           </button>
-        </div>
+        </form>
 
         {/* Mobile search toggle button */}
         <button
@@ -96,11 +134,13 @@ const YouTubeNavbar = () => {
 
       {/* Mobile search bar (appears when search icon is clicked) */}
       {showMobileSearch && (
-        <div
+        <form
+          onSubmit={handleSearch}
           ref={searchRef}
           className="md:hidden flex items-center p-2 bg-white border-t"
         >
           <button
+            type="button"
             className="p-2 mr-2 rounded-full hover:bg-gray-200"
             onClick={() => setShowMobileSearch(false)}
           >
@@ -125,14 +165,30 @@ const YouTubeNavbar = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:outline-none focus:border-blue-500"
             />
-            <button className="px-4 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200">
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-200"
+              >
+                <FaTimes className="text-gray-500" />
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 disabled:opacity-50"
+            >
               <FaSearch className="text-gray-600" />
             </button>
           </div>
-          <button className="p-2 ml-2 rounded-full bg-gray-100 hover:bg-gray-200">
+          <button
+            type="button"
+            className="p-2 ml-2 rounded-full bg-gray-100 hover:bg-gray-200"
+          >
             <FaMicrophone className="text-gray-600" />
           </button>
-        </div>
+        </form>
       )}
     </header>
   );
